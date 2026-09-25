@@ -1,0 +1,26 @@
+// Seed properties for sargantana's div_4bits, one radix-16 restoring-division
+// step. They are hand-written so the loop can produce a real, qualified
+// snapshot while SVApshot's LLM agent is being reworked; the same text is what
+// the agent would submit through SVApshotTool.propose_properties.
+//
+// div_4bits is purely combinational — it has no clock or reset port — so these
+// are immediate assertions inside always_comb. Concurrent `assert property`
+// with `|->` does not compile here; use boolean implication instead.
+//
+// Expected outcome: the first two prove, the third is falsified, because
+// "remainder stays below the divisor" is a loop invariant of div_unit rather
+// than a property of a single step in isolation.
+
+always_comb begin
+  // The divisor travels through the step untouched.
+  as_divisor_passthrough : assert (divisor_o == divisor_i);
+
+  // Two restoring steps shift two quotient bits in at the bottom, so the upper
+  // 62 bits of the output are the lower 62 bits of the input.
+  as_quotient_shift : assert (dividend_quotient_o[63:2] == dividend_quotient_i[61:0]);
+
+  // A reduced remainder is only guaranteed when the incoming remainder was
+  // already reduced; unconstrained, this fails and exposes the missing
+  // environment assumption.
+  as_remainder_reduced : assert (!(divisor_i != 64'd0) || (remanent_o < divisor_i));
+end

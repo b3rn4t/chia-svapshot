@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 640"
+     role="img" aria-labelledby="title desc">
+  <title id="title">The CHIA PPA loop</title>
+  <desc id="desc">
+    Stage the DUT, elaborate in VC Formal, record baseline Yosys PPA,
+    freeze an SVApshot contract with Gemini and VC Formal, then rewrite
+    with Gemini, retain, reprove, resynthesize, and run observational EQY LEC.
+    The only back-edge is reprove fail to rewrite. Ports stay frozen.
+  </desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1a1a1a"/>
+    </marker>
+    <marker id="arrow-fail" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8b2e2e"/>
+    </marker>
+    <marker id="arrow-pass" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1f6b3a"/>
+    </marker>
+
+    <!-- CHIA: three-arrow loop -->
+    <symbol id="logo-chia" viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r="30" fill="#1a1a1a"/>
+      <path d="M32 12 a20 20 0 1 1 -14.1 5.9" fill="none" stroke="#f4f1ea" stroke-width="5" stroke-linecap="round"/>
+      <path d="M16.2 19.2 l8.4 1.2 -4.8 7" fill="#f4f1ea"/>
+      <path d="M48 38 a16 16 0 0 1 -20 10" fill="none" stroke="#e0a84a" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="32" cy="32" r="5" fill="#e0a84a"/>
+    </symbol>
+
+    <!-- VC Formal: navy shield + V -->
+    <symbol id="logo-vcf" viewBox="0 0 64 64">
+      <path d="M32 4 L56 14 V34 C56 48 44 58 32 60 C20 58 8 48 8 34 V14 Z" fill="#0b3a66"/>
+      <path d="M32 10 L50 18 V34 C50 45 41 53 32 55 C23 53 14 45 14 34 V18 Z" fill="#1d6fb8"/>
+      <path d="M20 24 L32 48 L44 24" fill="none" stroke="#f4f7fb" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M18 20 H46" stroke="#f4c14b" stroke-width="3" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- Yosys: geometric bird / Y -->
+    <symbol id="logo-yosys" viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r="30" fill="#1f7a3a"/>
+      <path d="M14 18 L32 34 L50 18" fill="none" stroke="#e8f7ea" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M32 32 V50" stroke="#e8f7ea" stroke-width="6" stroke-linecap="round"/>
+      <path d="M38 16 L54 22 L42 28 Z" fill="#f3d36b"/>
+      <circle cx="24" cy="22" r="2.4" fill="#0d3d1c"/>
+    </symbol>
+
+    <!-- Gemini: four-point spark -->
+    <symbol id="logo-gemini" viewBox="0 0 64 64">
+      <rect width="64" height="64" rx="14" fill="#3c1e8c"/>
+      <path d="M32 6 C36 22 42 28 58 32 C42 36 36 42 32 58 C28 42 22 36 6 32 C22 28 28 22 32 6 Z" fill="#c9b6ff"/>
+      <path d="M48 12 C50 18 52 20 58 22 C52 24 50 26 48 32 C46 26 44 24 38 22 C44 20 46 18 48 12 Z" fill="#7ee0ff"/>
+    </symbol>
+
+    <!-- SVApshot: aperture + assert tick -->
+    <symbol id="logo-svapshot" viewBox="0 0 64 64">
+      <rect width="64" height="64" rx="14" fill="#14324d"/>
+      <rect x="10" y="16" width="44" height="32" rx="6" fill="none" stroke="#d7e8f5" stroke-width="3.5"/>
+      <circle cx="32" cy="32" r="10" fill="none" stroke="#d7e8f5" stroke-width="3"/>
+      <circle cx="32" cy="32" r="4" fill="#5ec8ff"/>
+      <path d="M14 12 h10 l4 6 h-18 z" fill="#5ec8ff"/>
+      <path d="M42 44 l5 5 11 -12" fill="none" stroke="#7dffb3" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+
+    <!-- EQY: two nets + equivalence -->
+    <symbol id="logo-eqy" viewBox="0 0 64 64">
+      <rect width="64" height="64" rx="14" fill="#7a3d0d"/>
+      <rect x="8" y="14" width="22" height="22" rx="4" fill="#f3d19a"/>
+      <rect x="34" y="28" width="22" height="22" rx="4" fill="#f3d19a"/>
+      <path d="M30 25 H42 V28" fill="none" stroke="#ffe7c2" stroke-width="3" stroke-linecap="round"/>
+      <path d="M20 40 H34" stroke="#ffe7c2" stroke-width="3" stroke-linecap="round"/>
+      <path d="M22 50 h20 M22 56 h20" stroke="#fff4e4" stroke-width="3" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+
+  <style>
+    .fig { font-family: "Source Sans 3", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+    .title { font-size: 22px; font-weight: 700; fill: #111; }
+    .subtitle { font-size: 12.5px; fill: #444; }
+    .band { fill: #f6f6f4; stroke: #cfcfc8; stroke-width: 1; }
+    .band-label { font-size: 11px; font-weight: 700; fill: #555; letter-spacing: 0.02em; }
+    .card { stroke-width: 1.4; }
+    .cpu { fill: #ffffff; stroke: #222; }
+    .formal { fill: #e4eef6; stroke: #1d4b73; }
+    .yosys { fill: #e6f3ea; stroke: #1f6b3a; }
+    .llm { fill: #efe8f8; stroke: #4a2d86; }
+    .eqy { fill: #f7eee4; stroke: #7a3d0d; }
+    .abort { fill: #f6e4e4; stroke: #8b2e2e; }
+    .label { font-size: 13px; font-weight: 700; fill: #111; }
+    .sub { font-size: 10.5px; fill: #333; }
+    .tool { font-size: 10px; font-weight: 700; fill: #222; }
+    .badge { font-size: 9.5px; fill: #555; }
+    .edge { fill: none; stroke: #1a1a1a; stroke-width: 1.25; }
+    .edge-fail { fill: none; stroke: #8b2e2e; stroke-width: 1.35; stroke-dasharray: 5 3.5; }
+    .edge-pass { fill: none; stroke: #1f6b3a; stroke-width: 1.35; }
+    .edge-text { font-size: 10px; font-weight: 700; }
+    .legend { font-size: 11px; fill: #222; }
+    .icon-ring { fill: #fff; stroke: #111; stroke-width: 1; }
+  </style>
+
+  <g class="fig">
+    <text class="title" x="28" y="30">The CHIA PPA loop</text>
+    <text class="subtitle" x="28" y="50">One snapshot DUT. Solid arrows are Ray edges. Dashed red is the only retry.</text>
+
+    <rect class="band" x="16" y="64" width="1088" height="168" rx="8"/>
+    <text class="band-label" x="32" y="86">Entry gate — no LLM. Elaborate fail drops the DUT.</text>
+
+    <rect class="band" x="16" y="248" width="1088" height="118" rx="8"/>
+    <text class="band-label" x="32" y="270">Contract — generated once on the baseline RTL</text>
+
+    <rect class="band" x="16" y="382" width="1088" height="196" rx="8"/>
+    <text class="band-label" x="32" y="404">Improve — port-frozen rewrite, retain, reprove, candidate PPA, observational LEC</text>
+
+    <!-- 1 Stage -->
+    <g transform="translate(36,102)">
+      <rect class="card cpu" width="196" height="112" rx="8"/>
+      <circle class="icon-ring" cx="36" cy="36" r="22"/>
+      <use href="#logo-chia" x="18" y="18" width="36" height="36"/>
+      <text class="label" x="68" y="28">1. Stage DUT</text>
+      <text class="sub" x="68" y="44">module + packages</text>
+      <text class="tool" x="16" y="78">CHIA / Ray</text>
+      <text class="badge" x="16" y="96">svapshot_cpu</text>
+    </g>
+    <path class="edge" d="M232 158 H258" marker-end="url(#arrow)"/>
+
+    <!-- 2 VCF -->
+    <g transform="translate(260,102)">
+      <rect class="card formal" width="214" height="112" rx="8"/>
+      <circle class="icon-ring" cx="36" cy="36" r="22"/>
+      <use href="#logo-vcf" x="18" y="18" width="36" height="36"/>
+      <text class="label" x="68" y="28">2. Elaborate</text>
+      <text class="sub" x="68" y="44">analyze + elaborate</text>
+      <text class="tool" x="16" y="78">Synopsys VC Formal</text>
+      <text class="badge" x="16" y="96">formal · no retry</text>
+    </g>
+
+    <path class="edge-fail" d="M367 102 V80 H980" marker-end="url(#arrow-fail)"/>
+    <g transform="translate(984,66)">
+      <rect class="card abort" width="100" height="28" rx="6"/>
+      <text class="sub" x="50" y="18" text-anchor="middle">abort DUT</text>
+    </g>
+    <text class="edge-text" x="700" y="76" fill="#8b2e2e">elab fail</text>
+
+    <path class="edge-pass" d="M474 158 H500" marker-end="url(#arrow-pass)"/>
+    <text class="edge-text" x="478" y="148" fill="#1f6b3a">pass</text>
+
+    <!-- 3 Yosys baseline -->
+    <g transform="translate(502,102)">
+      <rect class="card yosys" width="250" height="112" rx="8"/>
+      <circle class="icon-ring" cx="36" cy="36" r="22"/>
+      <use href="#logo-yosys" x="18" y="18" width="36" height="36"/>
+      <text class="label" x="68" y="28">3. Baseline PPA</text>
+      <text class="sub" x="68" y="44">cells · wires · LTP</text>
+      <text class="tool" x="16" y="78">Yosys  synth; stat; ltp</text>
+      <text class="badge" x="16" y="96">yosys</text>
+    </g>
+    <path class="edge" d="M627 214 V286" marker-end="url(#arrow)"/>
+
+    <!-- 4 SVApshot -->
+    <g transform="translate(300,286)">
+      <rect class="card formal" width="520" height="64" rx="8"/>
+      <use href="#logo-svapshot" x="14" y="14" width="36" height="36"/>
+      <use href="#logo-gemini" x="56" y="14" width="36" height="36"/>
+      <use href="#logo-vcf" x="98" y="14" width="36" height="36"/>
+      <text class="label" x="148" y="28">4. SVApshot generate and freeze</text>
+      <text class="sub" x="148" y="46">Gemini drafts SVA · VC Formal proves · cap 50 · proved-non-vacuous</text>
+    </g>
+    <path class="edge" d="M400 350 V430" marker-end="url(#arrow)"/>
+
+    <!-- 5 Gemini rewrite -->
+    <g transform="translate(32,430)">
+      <rect class="card llm" width="196" height="112" rx="8"/>
+      <circle class="icon-ring" cx="36" cy="36" r="22"/>
+      <use href="#logo-gemini" x="18" y="18" width="36" height="36"/>
+      <text class="label" x="68" y="28">5. RTL rewrite</text>
+      <text class="sub" x="68" y="44">ports frozen</text>
+      <text class="tool" x="16" y="78">Gemini on Vertex</text>
+      <text class="badge" x="16" y="96">llm · opt / expand / trim</text>
+    </g>
+    <path class="edge" d="M228 486 H250" marker-end="url(#arrow)"/>
+
+    <!-- 6 Retain -->
+    <g transform="translate(252,430)">
+      <rect class="card cpu" width="188" height="112" rx="8"/>
+      <circle class="icon-ring" cx="36" cy="36" r="22"/>
+      <use href="#logo-svapshot" x="18" y="18" width="36" height="36"/>
+      <text class="label" x="68" y="28">6. Retain</text>
+      <text class="sub" x="68" y="44">signals ⊆ new DUT</text>
+      <text class="tool" x="16" y="78">SVApshot retain</text>
+      <text class="badge" x="16" y="96">svapshot_cpu</text>
+    </g>
+    <path class="edge" d="M440 486 H462" marker-end="url(#arrow)"/>
+
+    <!-- 7 Reprove -->
+    <g transform="translate(464,430)">
+      <rect class="card formal" width="188" height="112" rx="8"/>
+      <circle class="icon-ring" cx="36" cy="36" r="22"/>
+      <use href="#logo-vcf" x="18" y="18" width="36" height="36"/>
+      <text class="label" x="68" y="28">7. Reprove</text>
+      <text class="sub" x="68" y="44">no new SVA</text>
+      <text class="tool" x="16" y="78">Synopsys VC Formal</text>
+      <text class="badge" x="16" y="96">formal</text>
+    </g>
+
+    <path class="edge-fail" d="M464 542 C 360 590, 180 590, 130 542"
+          marker-end="url(#arrow-fail)"/>
+    <text class="edge-text" x="248" y="582" fill="#8b2e2e">fail → rewrite</text>
+
+    <path class="edge-pass" d="M652 486 H674" marker-end="url(#arrow-pass)"/>
+    <text class="edge-text" x="656" y="476" fill="#1f6b3a">pass</text>
+
+    <!-- 8 Yosys candidate -->
+    <g transform="translate(676,430)">
+      <rect class="card yosys" width="196" height="112" rx="8"/>
+      <circle class="icon-ring" cx="36" cy="36" r="22"/>
+      <use href="#logo-yosys" x="18" y="18" width="36" height="36"/>
+      <text class="label" x="68" y="28">8. Candidate PPA</text>
+      <text class="sub" x="68" y="44">score vs baseline</text>
+      <text class="tool" x="16" y="78">Yosys</text>
+      <text class="badge" x="16" y="96">yosys</text>
+    </g>
+    <path class="edge" d="M872 486 H894" marker-end="url(#arrow)"/>
+
+    <!-- 9 EQY -->
+    <g transform="translate(896,430)">
+      <rect class="card eqy" width="192" height="112" rx="8"/>
+      <circle class="icon-ring" cx="36" cy="36" r="22"/>
+      <use href="#logo-eqy" x="18" y="18" width="36" height="36"/>
+      <text class="label" x="68" y="28">9. EQY LEC</text>
+      <text class="sub" x="68" y="44">observational</text>
+      <text class="tool" x="16" y="78">Yosys EQY</text>
+      <text class="badge" x="16" y="96">fail does not abort</text>
+    </g>
+
+    <g transform="translate(28,612)">
+      <use href="#logo-chia" x="0" y="-14" width="18" height="18"/>
+      <text class="legend" x="24" y="0">CHIA / Ray</text>
+      <use href="#logo-vcf" x="120" y="-14" width="18" height="18"/>
+      <text class="legend" x="144" y="0">VC Formal</text>
+      <use href="#logo-yosys" x="236" y="-14" width="18" height="18"/>
+      <text class="legend" x="260" y="0">Yosys</text>
+      <use href="#logo-gemini" x="324" y="-14" width="18" height="18"/>
+      <text class="legend" x="348" y="0">Gemini</text>
+      <use href="#logo-svapshot" x="416" y="-14" width="18" height="18"/>
+      <text class="legend" x="440" y="0">SVApshot</text>
+      <use href="#logo-eqy" x="528" y="-14" width="18" height="18"/>
+      <text class="legend" x="552" y="0">EQY</text>
+      <line class="edge-fail" x1="620" y1="-4" x2="656" y2="-4" marker-end="url(#arrow-fail)"/>
+      <text class="legend" x="664" y="0">retry</text>
+      <line class="edge-pass" x1="720" y1="-4" x2="756" y2="-4" marker-end="url(#arrow-pass)"/>
+      <text class="legend" x="764" y="0">pass</text>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Snapshot-gated RTL rewrite — poster draft</title>
+  <style>
+    @page { size: A0 landscape; margin: 12mm; }
+    :root {
+      --ink: #141414;
+      --muted: #444;
+      --line: #c8c8c4;
+      --paper: #f7f4ee;
+      --opt: #1f6b3a;
+      --exp: #4a2d86;
+      --trim: #8a3d0d;
+      --fail: #8b2e2e;
+      --win: #1a5c32;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      background: #ddd;
+      color: var(--ink);
+      font: 16px/1.35 "Source Sans 3", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+    .sheet {
+      width: 1189mm;
+      min-height: 841mm;
+      margin: 16px auto;
+      padding: 18mm 20mm 16mm;
+      background: var(--paper);
+      color: var(--ink);
+    }
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      border-bottom: 4px solid var(--ink);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 42px;
+      line-height: 1.1;
+      font-weight: 700;
+    }
+    .sub { font-size: 20px; color: var(--muted); }
+    .meta { font-size: 16px; text-align: right; color: var(--muted); }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.05fr 1.25fr 0.95fr;
+      gap: 16px 20px;
+    }
+    section {
+      background: #fff;
+      border: 1px solid var(--line);
+      padding: 14px 16px 16px;
+    }
+    h2 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      letter-spacing: 0.02em;
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 4px;
+    }
+    p, li { font-size: 15.5px; }
+    p { margin: 0 0 8px; }
+    ul { margin: 0; padding-left: 1.15em; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 5px 6px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { font-size: 13px; color: var(--muted); font-weight: 600; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .win { color: var(--win); font-weight: 650; }
+    .fail { color: var(--fail); font-weight: 650; }
+    .modes {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .mode {
+      padding: 8px 10px;
+      border-top: 5px solid var(--ink);
+    }
+    .mode.opt { border-top-color: var(--opt); background: #eef6ef; }
+    .mode.exp { border-top-color: var(--exp); background: #f4eef8; }
+    .mode.trim { border-top-color: var(--trim); background: #f8f0e8; }
+    .mode b { display: block; font-size: 16px; margin-bottom: 2px; }
+    figure { margin: 8px 0 0; }
+    figure img { width: 100%; height: auto; display: block; }
+    figcaption { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+    footer {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 3px solid var(--ink);
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      font-size: 15px;
+    }
+    .span2 { grid-column: span 2; }
+    .note { font-size: 13px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <article class="sheet">
+    <header>
+      <div>
+        <h1>Snapshot-gated RTL rewrite: optimise, expand, and trim</h1>
+        <div class="sub">A CHIA loop that freezes an SVApshot contract once, then scores port-frozen LLM rewrites with Yosys PPA and VC Formal reprove.</div>
+      </div>
+      <div class="meta">
+        Draft · CHIA × SVApshot<br/>
+        Authors TBD · affiliation TBD<br/>
+        Yosys cells / LTP — not GE or Watts
+      </div>
+    </header>
+
+    <div class="grid">
+      <section>
+        <h2>Claim</h2>
+        <p>One frozen SVA snapshot is enough to run three rewrite modes on the same DUT. Both <b>better PPA with a passing snapshot</b> and <b>a failing snapshot on the new RTL</b> are headline results — not only the first.</p>
+        <div class="modes">
+          <div class="mode opt"><b>Optimise</b> Same ports and function. Retry toward a passing snapshot. Optional axis: <i>top</i> vs <i>hierarchy</i>.</div>
+          <div class="mode exp"><b>Expand</b> Keep every current result. Add one capability. Pass or fail is evidence.</div>
+          <div class="mode trim"><b>Trim</b> Same ports. Keep the essential path. The old contract often dies — that is the measurement.</div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Method</h2>
+        <p>Stage DUT (+ <code>match_instance</code> parent defaults) → VC Formal elaborate (hard gate) → Yosys baseline → SVApshot generate/freeze → for each mode: Gemini rewrite → retain → reprove → Yosys candidate → score. Observational EQY LEC if the snapshot passed. The only back-edge is reprove → rewrite on optimise.</p>
+        <figure>
+          <img src="../figures/chia_ppa_loop.svg" alt="CHIA PPA loop with tool marks"/>
+          <figcaption>Figure 1. Loop and tools. Color in Figure 2 (topology SVG) is the Ray resource: head, cpu, formal, yosys, llm.</figcaption>
+        </figure>
+      </section>
+
+      <section>
+        <h2>Optimise: top vs hierarchy</h2>
+        <p>On <code>fpnew_top</code>, <b>top</b> may rewrite only <code>fpnew_top.sv</code>. <b>Hierarchy</b> may rewrite children (opgroup, FMA, DivSqrt). Same snapshot, different blast radius.</p>
+        <table>
+          <tr><th>Setting</th><th>Scope</th><th class="num">Base</th><th class="num">Cand.</th><th>Snap</th></tr>
+          <tr>
+            <td>Default cvFPU, DivSqrt blackbox</td>
+            <td>Top</td>
+            <td class="num">99,959 / 200</td>
+            <td class="num">100,544 / 198</td>
+            <td class="fail">17/30 fail</td>
+          </tr>
+          <tr>
+            <td>Sargantana <code>i_fpuv_top</code> + C910 RTL</td>
+            <td>Top</td>
+            <td class="num">74,070 / 108</td>
+            <td class="num">—</td>
+            <td>generate running</td>
+          </tr>
+          <tr>
+            <td>Either</td>
+            <td>Hierarchy</td>
+            <td class="num">—</td>
+            <td class="num">—</td>
+            <td class="note">not packaged</td>
+          </tr>
+        </table>
+        <p class="note">Do not mix the two baselines: Features / Implementation / DivSqrt RTL differ. The blackbox top pass barely moved PPA and lost the snapshot after three retries.</p>
+      </section>
+
+      <section class="span2">
+        <h2>Results — three modes, two Sargantana leaves</h2>
+        <p><code>div_unit</code> baseline <b>9,257 cells / LTP 243</b>. <code>ptw</code> baseline <b>2,813 / 22</b>. Snapshot = retained properties that proved after rewrite.</p>
+        <table>
+          <tr>
+            <th>DUT</th><th>Mode</th>
+            <th class="num">Cells</th><th class="num">Δ</th>
+            <th class="num">LTP</th><th>Snapshot</th><th>Headline</th>
+          </tr>
+          <tr>
+            <td>div_unit</td><td>Optimise</td>
+            <td class="num">6,531</td><td class="num win">−29%</td>
+            <td class="num">243</td><td>30/30 pass</td>
+            <td class="win">better PPA, passing snapshot</td>
+          </tr>
+          <tr>
+            <td>div_unit</td><td>Expand</td>
+            <td class="num">10,307</td><td class="num">+11%</td>
+            <td class="num">245</td><td>30/30 pass</td>
+            <td>snapshot holds, no PPA win</td>
+          </tr>
+          <tr>
+            <td>div_unit</td><td>Trim</td>
+            <td class="num">6,556</td><td class="num win">−29%</td>
+            <td class="num">242</td><td>13/13 pass (17 dropped)</td>
+            <td class="win">better PPA, passing snapshot</td>
+          </tr>
+          <tr>
+            <td>ptw</td><td>Optimise</td>
+            <td class="num">2,858</td><td class="num">+1.6%</td>
+            <td class="num">22</td><td>43/43 pass</td>
+            <td>snapshot holds, no PPA win</td>
+          </tr>
+          <tr>
+            <td>ptw</td><td>Expand</td>
+            <td class="num">3,148</td><td class="num">+12%</td>
+            <td class="num">22</td><td class="fail">0/43 fail</td>
+            <td class="fail">failing snapshot on new design</td>
+          </tr>
+          <tr>
+            <td>ptw</td><td>Trim</td>
+            <td class="num">582</td><td class="num win">−79%</td>
+            <td class="num win">13</td><td class="fail">0/37 fail</td>
+            <td class="fail">failing snapshot on new design</td>
+          </tr>
+        </table>
+        <p class="note">Packaged in <code>hackathon/results/</code>. Gemini 3.1 Pro except <code>div_unit</code> trim (2.5 Pro). <code>mul_unit</code> generate was 0/50 snapshot-worthy — omitted.</p>
+      </section>
+
+      <section>
+        <h2>How to read a cell</h2>
+        <ul>
+          <li><b>Green Δ + passing snap</b> — snapshot-pass PPA wins: <code>div_unit</code> optimise (30/30) and trim (13/13).</li>
+          <li><b>Passing snap, worse or flat PPA</b> — the rewrite was legal and useless for area/delay (<code>ptw</code> optimise, <code>div_unit</code> expand).</li>
+          <li><b>Red snapshot</b> — new RTL left the contract. Expected on trim/expand; a problem if optimise wanted a win.</li>
+        </ul>
+        <p>EQY LEC is observational. Functional gold for the graph is the snapshot.</p>
+      </section>
+    </div>
+
+    <footer>
+      <div>
+        <b>1.</b> Two <code>div_unit</code> snapshot-pass PPA wins: optimise 30/30 and trim 13/13, both −29% cells. <code>ptw</code> optimise held 43/43 and missed PPA.
+      </div>
+      <div>
+        <b>2.</b> Expand and trim are first-class measurements. <code>ptw</code> trim is an 79% cell cut that correctly kills the old snapshot.
+      </div>
+      <div>
+        <b>3.</b> The missing poster cell is <code>fpnew_top</code> hierarchy vs top, on the Sargantana scalar setting (74k / LTP 108).
+      </div>
+    </footer>
+  </article>
+</body>
+</html>

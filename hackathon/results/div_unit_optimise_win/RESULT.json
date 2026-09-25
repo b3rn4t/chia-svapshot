@@ -1,0 +1,21 @@
+{
+  "directory": "div_unit_optimise_win",
+  "module": "div_unit",
+  "execution_type": "optimise",
+  "verdict": "win",
+  "outcome": "ppa_win_snapshot_pass",
+  "headline": "better PPA and passing snapshot",
+  "model": "gemini-3.1-pro-preview",
+  "baseline_ppa": {
+    "cells": 9257,
+    "wires": 7357,
+    "levels": 243
+  },
+  "candidate_ppa": {
+    "cells": 6531,
+    "wires": 5400,
+    "levels": 243
+  },
+  "snapshot": "30/30 retained properties proved",
+  "workspace": "chia_svapshot/runs/ppa_div_unit_opt"
+}

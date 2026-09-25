@@ -1,0 +1,12 @@
+# Loop workspaces: symlink overlays of the checkout plus per-run formal output.
+runs/
+snapshot_library/
+!evidence/
+__pycache__/
+*.pyc
+chia_env/
+hackathon/toolchains/
+hackathon/.venv/
+hackathon/runs/
+hackathon/.env.gcp
+.env

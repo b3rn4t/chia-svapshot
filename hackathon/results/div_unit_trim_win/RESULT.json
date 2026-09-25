@@ -1,0 +1,21 @@
+{
+  "directory": "div_unit_trim_win",
+  "module": "div_unit",
+  "execution_type": "trim",
+  "verdict": "win",
+  "outcome": "ppa_win_snapshot_pass",
+  "headline": "better PPA and passing snapshot",
+  "model": "gemini-2.5-pro",
+  "baseline_ppa": {
+    "cells": 9257,
+    "wires": 7357,
+    "levels": 243
+  },
+  "candidate_ppa": {
+    "cells": 6556,
+    "wires": 4786,
+    "levels": 242
+  },
+  "snapshot": "13/13 retained properties proved (17 dropped)",
+  "workspace": "chia_svapshot/runs/ppa_sargantana"
+}

@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 820"
+     role="img" aria-labelledby="title desc">
+  <title id="title">CHIA PPA loop node topology</title>
+  <desc id="desc">
+    Flowchart of chia_ppa_loop.py. Colors are Ray worker classes and
+    ChiaFunction resources. Yellow is the head. Tan cylinders persist
+    artifacts. Orange is svapshot_cpu, blue is formal, green is yosys,
+    purple is llm.
+  </desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#333"/>
+    </marker>
+    <marker id="arr-g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#1a7a3a"/>
+    </marker>
+    <marker id="arr-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#b33"/>
+    </marker>
+  </defs>
+  <style>
+    .fig { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+    .title { font-size: 20px; font-weight: 700; fill: #111; }
+    .sub { font-size: 12px; fill: #444; }
+    .stage { fill: none; stroke: #888; stroke-width: 1.2; stroke-dasharray: 6 4; }
+    .stage-l { font-size: 12px; font-weight: 700; fill: #555; }
+    .n { stroke-width: 1.15; }
+    .head { fill: #f6e7a8; stroke: #8a7018; }
+    .cpu { fill: #f7d3a1; stroke: #8a5a18; }
+    .formal { fill: #c5dcf3; stroke: #1d4b73; }
+    .yosys { fill: #c8e6c9; stroke: #2a6b32; }
+    .llm { fill: #d9c8f0; stroke: #4a2d86; }
+    .log { fill: #ead9b8; stroke: #6b5428; }
+    .abort { fill: #f3c8c8; stroke: #8b2e2e; }
+    .t { font-size: 11.5px; font-weight: 700; fill: #111; }
+    .s { font-size: 10px; fill: #333; }
+    .e { fill: none; stroke: #333; stroke-width: 1.15; }
+    .eg { fill: none; stroke: #1a7a3a; stroke-width: 1.2; }
+    .er { fill: none; stroke: #b33; stroke-width: 1.2; }
+    .et { font-size: 10px; font-weight: 700; }
+    .leg-h { font-size: 12.5px; font-weight: 700; fill: #222; }
+    .leg { font-size: 11.5px; fill: #222; }
+    .dot { stroke: #333; stroke-width: 0.8; }
+  </style>
+
+  <g class="fig">
+    <text class="title" x="24" y="28">The CHIA PPA loop</text>
+    <text class="sub" x="24" y="48">Node topology of chia_ppa_loop.py. Color is the Ray resource on @ChiaFunction.</text>
+
+    <!-- Stage 1 -->
+    <rect class="stage" x="16" y="64" width="920" height="200" rx="6"/>
+    <text class="stage-l" x="28" y="84">Stage 1 � Entry gate</text>
+
+    <g transform="translate(36,104)">
+      <rect class="n head" width="150" height="44" rx="8"/>
+      <text class="t" x="75" y="20" text-anchor="middle">chia_ppa_loop</text>
+      <text class="s" x="75" y="36" text-anchor="middle">driver � get()</text>
+    </g>
+    <path class="e" d="M186 126 H214" marker-end="url(#arr)"/>
+
+    <g transform="translate(216,100)">
+      <rect class="n cpu" x="0" y="4" width="168" height="40" rx="4"/>
+      <rect class="n cpu" x="4" y="0" width="168" height="40" rx="4"/>
+      <text class="t" x="88" y="16" text-anchor="middle">stage_ppa_dut</text>
+      <text class="s" x="88" y="32" text-anchor="middle">module + packages</text>
+    </g>
+    <path class="e" d="M388 124 H416" marker-end="url(#arr)"/>
+
+    <g transform="translate(418,100)">
+      <rect class="n formal" x="0" y="4" width="176" height="40" rx="4"/>
+      <rect class="n formal" x="4" y="0" width="176" height="40" rx="4"/>
+      <text class="t" x="92" y="16" text-anchor="middle">vcf_elaborate</text>
+      <text class="s" x="92" y="32" text-anchor="middle">analyze + elaborate</text>
+    </g>
+    <path class="e" d="M598 124 H626" marker-end="url(#arr)"/>
+
+    <g transform="translate(628,102)">
+      <path class="n cpu" d="M40 0 L80 22 L40 44 L0 22 Z" fill="#fff8e8" stroke="#555"/>
+      <text class="t" x="40" y="20" text-anchor="middle">elab</text>
+      <text class="t" x="40" y="34" text-anchor="middle">ok?</text>
+    </g>
+
+    <path class="er" d="M668 102 V84 H820" marker-end="url(#arr-r)"/>
+    <text class="et" x="700" y="78" fill="#b33">fail</text>
+    <g transform="translate(824,70)">
+      <rect class="n abort" width="88" height="28" rx="6"/>
+      <text class="t" x="44" y="18" text-anchor="middle">abort DUT</text>
+    </g>
+
+    <path class="eg" d="M668 146 V168 H500" marker-end="url(#arr-g)"/>
+    <text class="et" x="580" y="162" fill="#1a7a3a">pass</text>
+
+    <g transform="translate(332,176)">
+      <rect class="n yosys" x="0" y="4" width="200" height="40" rx="4"/>
+      <rect class="n yosys" x="4" y="0" width="200" height="40" rx="4"/>
+      <text class="t" x="104" y="16" text-anchor="middle">yosys_ppa baseline</text>
+      <text class="s" x="104" y="32" text-anchor="middle">synth � stat � ltp</text>
+    </g>
+    <path class="e" d="M536 200 H564" marker-end="url(#arr)"/>
+
+    <g transform="translate(568,176)">
+      <ellipse class="n log" cx="70" cy="10" rx="70" ry="10"/>
+      <rect class="n log" x="0" y="10" width="140" height="34" stroke="none"/>
+      <ellipse class="n log" cx="70" cy="44" rx="70" ry="10"/>
+      <text class="t" x="70" y="32" text-anchor="middle">baseline.json</text>
+    </g>
+
+    <!-- inputs -->
+    <g transform="translate(960,72)">
+      <text class="stage-l" x="0" y="0">User inputs</text>
+      <rect class="n head" x="0" y="12" width="196" height="36" rx="3"/>
+      <text class="t" x="10" y="26">targets.yaml</text>
+      <text class="s" x="10" y="40">DUT � modes � match_instance</text>
+      <rect class="n head" x="0" y="56" width="196" height="36" rx="3"/>
+      <text class="t" x="10" y="70">parent RTL</text>
+      <text class="s" x="10" y="84">i_fpuv_top � packages</text>
+      <rect class="n head" x="0" y="100" width="196" height="36" rx="3"/>
+      <text class="t" x="10" y="114">cluster.yaml</text>
+      <text class="s" x="10" y="128">cpu � llm � formal � yosys</text>
+    </g>
+    <path class="e" d="M960 130 C 920 130, 200 90, 186 126" fill="none" stroke="#888" stroke-dasharray="3 3"/>
+
+    <!-- Stage 2 -->
+    <rect class="stage" x="16" y="280" width="920" height="120" rx="6"/>
+    <text class="stage-l" x="28" y="300">Stage 2 � Contract</text>
+
+    <path class="e" d="M432 220 V328" marker-end="url(#arr)"/>
+
+    <g transform="translate(200,324)">
+      <rect class="n formal" x="0" y="4" width="280" height="48" rx="4"/>
+      <rect class="n formal" x="4" y="0" width="280" height="48" rx="4"/>
+      <text class="t" x="144" y="20" text-anchor="middle">svapshot_generate_and_freeze</text>
+      <text class="s" x="144" y="36" text-anchor="middle">Gemini drafts SVA � VCF proves � cap 50</text>
+    </g>
+    <g transform="translate(360,336)">
+      <rect class="n llm" width="18" height="18" rx="3"/>
+    </g>
+    <path class="e" d="M484 352 H520" marker-end="url(#arr)"/>
+
+    <g transform="translate(524,328)">
+      <ellipse class="n log" cx="80" cy="10" rx="80" ry="10"/>
+      <rect class="n log" x="0" y="10" width="160" height="36" stroke="none"/>
+      <ellipse class="n log" cx="80" cy="46" rx="80" ry="10"/>
+      <text class="t" x="80" y="34" text-anchor="middle">snapshot_library</text>
+    </g>
+
+    <!-- Stage 3 -->
+    <rect class="stage" x="16" y="416" width="1148" height="248" rx="6"/>
+    <text class="stage-l" x="28" y="436">Stage 3 � Improve � port-frozen optimise / expand / trim</text>
+
+    <path class="e" d="M340 400 V464" marker-end="url(#arr)"/>
+
+    <g transform="translate(36,456)">
+      <rect class="n llm" width="176" height="48" rx="8"/>
+      <text class="t" x="88" y="20" text-anchor="middle">llm_rtl_rewrite</text>
+      <text class="s" x="88" y="36" text-anchor="middle">Gemini � ports frozen</text>
+    </g>
+    <path class="e" d="M212 480 H236" marker-end="url(#arr)"/>
+
+    <g transform="translate(238,456)">
+      <rect class="n cpu" x="0" y="4" width="168" height="40" rx="4"/>
+      <rect class="n cpu" x="4" y="0" width="168" height="40" rx="4"/>
+      <text class="t" x="88" y="16" text-anchor="middle">retain_snapshot</text>
+      <text class="s" x="88" y="32" text-anchor="middle">signals � new DUT</text>
+    </g>
+    <path class="e" d="M410 480 H434" marker-end="url(#arr)"/>
+
+    <g transform="translate(436,456)">
+      <rect class="n formal" x="0" y="4" width="176" height="40" rx="4"/>
+      <rect class="n formal" x="4" y="0" width="176" height="40" rx="4"/>
+      <text class="t" x="92" y="16" text-anchor="middle">svapshot_reprove</text>
+      <text class="s" x="92" y="32" text-anchor="middle">no new SVA</text>
+    </g>
+    <path class="e" d="M616 480 H640" marker-end="url(#arr)"/>
+
+    <g transform="translate(642,458)">
+      <path d="M40 0 L80 22 L40 44 L0 22 Z" fill="#fff8e8" stroke="#555" stroke-width="1.15"/>
+      <text class="t" x="40" y="20" text-anchor="middle">pass?</text>
+      <text class="s" x="40" y="34" text-anchor="middle">reprove</text>
+    </g>
+
+    <path class="er" d="M642 502 C 500 590, 200 590, 124 504" marker-end="url(#arr-r)"/>
+    <text class="et" x="300" y="576" fill="#b33">fail � rewrite</text>
+
+    <path class="eg" d="M722 480 H750" marker-end="url(#arr-g)"/>
+    <text class="et" x="728" y="470" fill="#1a7a3a">pass</text>
+
+    <g transform="translate(752,456)">
+      <rect class="n yosys" x="0" y="4" width="176" height="40" rx="4"/>
+      <rect class="n yosys" x="4" y="0" width="176" height="40" rx="4"/>
+      <text class="t" x="92" y="16" text-anchor="middle">yosys_ppa candidate</text>
+      <text class="s" x="92" y="32" text-anchor="middle">cells � LTP</text>
+    </g>
+    <path class="e" d="M932 480 H956" marker-end="url(#arr)"/>
+
+    <g transform="translate(958,456)">
+      <rect class="n head" width="150" height="48" rx="8"/>
+      <text class="t" x="75" y="20" text-anchor="middle">score_ppa</text>
+      <text class="s" x="75" y="36" text-anchor="middle">vs baseline</text>
+    </g>
+
+    <path class="e" d="M1033 504 V528 H840" marker-end="url(#arr)"/>
+
+    <g transform="translate(680,536)">
+      <rect class="n yosys" x="0" y="4" width="176" height="40" rx="4"/>
+      <rect class="n yosys" x="4" y="0" width="176" height="40" rx="4"/>
+      <text class="t" x="92" y="16" text-anchor="middle">yosys_lec</text>
+      <text class="s" x="92" y="32" text-anchor="middle">EQY � observational</text>
+    </g>
+    <path class="e" d="M860 560 H888" marker-end="url(#arr)"/>
+
+    <g transform="translate(892,536)">
+      <ellipse class="n log" cx="70" cy="10" rx="70" ry="10"/>
+      <rect class="n log" x="0" y="10" width="140" height="34" stroke="none"/>
+      <ellipse class="n log" cx="70" cy="44" rx="70" ry="10"/>
+      <text class="t" x="70" y="32" text-anchor="middle">summary.json</text>
+    </g>
+
+    <text class="s" x="36" y="648">LEC fail is recorded, not a loop failure. Functional gold is the frozen snapshot.</text>
+
+    <!-- Legend  paper style -->
+    <line x1="16" y1="676" x2="1164" y2="676" stroke="#ccc"/>
+    <text class="leg-h" x="24" y="700">Chia library nodes</text>
+    <text class="leg-h" x="520" y="700">Application nodes</text>
+
+    <circle class="dot head" cx="32" cy="724" r="7"/>
+    <text class="leg" x="46" y="728">Head node  chia_ppa_loop, score_ppa  (@ChiaFunction, no licence)</text>
+    <circle class="dot log" cx="32" cy="750" r="7"/>
+    <text class="leg" x="46" y="754">Persistent logging  snapshot_library, baseline.json, summary.json</text>
+    <circle class="dot cpu" cx="32" cy="776" r="7"/>
+    <text class="leg" x="46" y="780">svapshot_cpu worker  also hosts the yosys slots</text>
+
+    <circle class="dot cpu" cx="528" cy="724" r="7"/>
+    <text class="leg" x="542" y="728">SVApshot CPU  stage_ppa_dut, retain_snapshot</text>
+    <circle class="dot formal" cx="528" cy="750" r="7"/>
+    <text class="leg" x="542" y="754">VC Formal  vcf_elaborate, generate_and_freeze, reprove</text>
+    <circle class="dot yosys" cx="528" cy="776" r="7"/>
+    <text class="leg" x="542" y="780">Yosys  yosys_ppa, yosys_lec (EQY)</text>
+    <circle class="dot llm" cx="900" cy="724" r="7"/>
+    <text class="leg" x="914" y="728">LLM  llm_rtl_rewrite (Gemini / Vertex)</text>
+    <circle class="dot abort" cx="900" cy="750" r="7"/>
+    <text class="leg" x="914" y="754">Abort  elaborate never retries</text>
+  </g>
+</svg>

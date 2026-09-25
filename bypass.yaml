@@ -1,0 +1,24 @@
+# Offline replay for the SVApshot loop.
+#
+# A bypassed node is still dispatched through Ray with its real resource
+# requirements — placement, retries and profiling all happen — but a provider
+# registered in chia_svapshot/offline.py returns the value instead of the node
+# running. That makes it possible to develop the loop without holding a formal
+# licence or spending LLM credits.
+#
+# Delete or comment out an entry to make that stage run for real. Running with
+# no --bypass-config at all disables the mechanism entirely.
+
+bypass:
+    # harness scaffolding is cheap and needs no licence, so it is left running
+    # for real by default. Uncomment if the harness scaffolder is unavailable.
+    # svapshot_scaffold:
+    #     bypass: true
+
+    # Initial LLM seeding spends model credits.
+    svapshot_seed:
+        bypass: true
+
+    # The agent + VC Formal stage: minutes of runtime and one licence.
+    svapshot_prove:
+        bypass: true

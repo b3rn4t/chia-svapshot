@@ -1,0 +1,36 @@
+{
+  "mapping": {
+    "SVAPSHOT_ROOT": "$SVAPSHOT_ROOT",
+    "CHIPYARD_ROOT": "$CHIPYARD_ROOT"
+  },
+  "reports": [
+    {
+      "design": "megaboom",
+      "module": "AMOALU",
+      "yosys": {
+        "ok": true,
+        "returncode": 0,
+        "frontend": "slang",
+        "cells": 1405,
+        "wires": 1348,
+        "levels": 125,
+        "log_tail": "  101: $abc$3227$new_n552 (via $abc$3227$auto$blifparse.cc:397:parse_blif$3574)\n  102: $abc$3227$new_n553 (via $abc$3227$auto$blifparse.cc:397:parse_blif$3575)\n  103: $abc$3227$new_n554 (via $abc$3227$auto$blifparse.cc:397:parse_blif$3576)\n  104: $abc$3227$new_n555 (via $abc$3227$auto$blifparse.cc:397:parse_blif$3577)\n  105: $abc$3227$new_n556 (via $abc$3227$auto$blifparse.cc:397:parse_blif$3578)\n  106: $abc$3227$new_n557 (via $abc$3227$auto$blifparse.cc:397:parse_blif$3579)\n  107: $abc$3227$new_n558 (via $abc$3227$auto$blifparse.cc:397:parse_blif$3580)\n  108: $abc$3227$new_n559 (via $abc$3227$auto$blifparse.cc:397:parse_blif$3581)\n  109: $abc$3227$new_n560 (via $abc$3227$auto$blifparse.cc:397:parse_blif$3582)\n  110: $abc$3227$new_n561 (via $abc$3227$auto$blifparse.cc:397:parse_blif$3583)\n  111: $abc$3227$new_n562 (via $abc$3227$auto$blifparse.cc:397:parse_blif$3584)\n  112: $abc$3227$new_n563 (via $abc$3227$auto$blifparse.cc:397:parse_blif$3585)\n  113: $abc$3227$new_n564 (via $abc$3227$auto$blifparse.cc:397:parse_blif$3586)\n  114: $abc$3227$new_n565 (via $abc$3227$auto$blifparse.cc:397:parse_blif$3587)\n  115: $abc$3227$new_n566 (via $abc$3227$auto$blifparse.cc:397:parse_blif$3588)\n  116: $abc$3227$new_n567 (via $abc$3227$auto$blifparse.cc:397:parse_blif$3589)\n  117: $abc$3227$new_n568 (via $abc$3227$auto$blifparse.cc:397:parse_blif$3590)\n  118: $abc$3227$new_n569 (via $abc$3227$auto$blifparse.cc:397:parse_blif$3591)\n  119: $abc$3227$new_n570 (via $abc$3227$auto$blifparse.cc:397:parse_blif$3592)\n  120: $abc$3227$new_n1596 (via $abc$3227$auto$blifparse.cc:397:parse_blif$4618)\n  121: $abc$3227$new_n1598 (via $abc$3227$auto$blifparse.cc:397:parse_blif$4620)\n  122: $abc$3227$new_n1599 (via $abc$3227$auto$blifparse.cc:397:parse_blif$4621)\n  123: $abc$3227$new_n1600 (via $abc$3227$auto$blifparse.cc:397:parse_blif$4622)\n  124: $abc$3227$new_n1609 (via $abc$3227$auto$blifparse.cc:397:parse_blif$4631)\n  125: \\io_out [63] (via $abc$3227$auto$blifparse.cc:397:parse_blif$4632)\n\n"
+      },
+      "ok": true
+    },
+    {
+      "design": "fpnew",
+      "module": "lzc",
+      "yosys": {
+        "ok": true,
+        "returncode": 0,
+        "frontend": "slang",
+        "cells": 84,
+        "wires": 85,
+        "levels": 15,
+        "log_tail": "    500 wire bits\n        7 public wires\n      422 public wire bits\n        3 ports\n       38 port bits\n       84 cells\n        9   $_ANDNOT_\n       18   $_AND_\n        2   $_MUX_\n       16   $_NAND_\n       30   $_NOR_\n        6   $_ORNOT_\n        3   $_OR_\n\n4.26. Executing CHECK pass (checking for obvious problems).\nChecking module lzc...\nFound and reported 0 problems.\n\n5. Printing statistics.\n\n=== lzc ===\n\n        +----------Local Count, excluding submodules.\n        | \n       85 wires\n      500 wire bits\n        7 public wires\n      422 public wire bits\n        3 ports\n       38 port bits\n       84 cells\n        9   $_ANDNOT_\n       18   $_AND_\n        2   $_MUX_\n       16   $_NAND_\n       30   $_NOR_\n        6   $_ORNOT_\n        3   $_OR_\n\n6. Executing LTP pass (find longest path).\n\nLongest topological path in lzc (length=15):\n    0: \\in_i [17]\n    1: $abc$161$new_n90 (via $abc$161$auto$blifparse.cc:397:parse_blif$213)\n    2: $abc$161$new_n91 (via $abc$161$auto$blifparse.cc:397:parse_blif$214)\n    3: $abc$161$new_n92 (via $abc$161$auto$blifparse.cc:397:parse_blif$215)\n    4: $abc$161$new_n93 (via $abc$161$auto$blifparse.cc:397:parse_blif$216)\n    5: $abc$161$new_n94 (via $abc$161$auto$blifparse.cc:397:parse_blif$217)\n    6: $abc$161$new_n95 (via $abc$161$auto$blifparse.cc:397:parse_blif$218)\n    7: $abc$161$new_n96 (via $abc$161$auto$blifparse.cc:397:parse_blif$219)\n    8: $abc$161$new_n97 (via $abc$161$auto$blifparse.cc:397:parse_blif$220)\n    9: $abc$161$new_n98 (via $abc$161$auto$blifparse.cc:397:parse_blif$221)\n   10: $abc$161$new_n99 (via $abc$161$auto$blifparse.cc:397:parse_blif$222)\n   11: $abc$161$new_n100 (via $abc$161$auto$blifparse.cc:397:parse_blif$223)\n   12: $abc$161$new_n101 (via $abc$161$auto$blifparse.cc:397:parse_blif$224)\n   13: $abc$161$new_n102 (via $abc$161$auto$blifparse.cc:397:parse_blif$225)\n   14: $abc$161$new_n104 (via $abc$161$auto$blifparse.cc:397:parse_blif$227)\n   15: \\cnt_o [0] (via $abc$161$auto$blifparse.cc:397:parse_blif$242)\n\n"
+      },
+      "ok": true
+    }
+  ]
+}

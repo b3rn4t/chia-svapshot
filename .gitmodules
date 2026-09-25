@@ -1,0 +1,3 @@
+[submodule "svapshot"]
+	path = svapshot
+	url = git@github.com:b3rn4t/svapshot.git

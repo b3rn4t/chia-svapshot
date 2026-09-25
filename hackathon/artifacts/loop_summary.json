@@ -1,0 +1,76 @@
+{
+  "workspace": "/tmp/pytest-of-user/pytest-2/test_offline_loop_writes_score0/run",
+  "mode": "implement",
+  "formal_tool": "vcformal",
+  "elapsed_s": 1.24,
+  "emit": {
+    "from_chipyard": false,
+    "files": [
+      "DecodeCommitPorts.sv"
+    ],
+    "notes": [
+      "CHIPYARD_ROOT unset or build skipped; using DecodeCommitPorts fixture"
+    ]
+  },
+  "contracts": [
+    {
+      "module": "DecodeCommitPorts",
+      "worthy": 3,
+      "total": 8,
+      "accepted": false,
+      "reason": "snapshot yield 38% is below the 50% target"
+    }
+  ],
+  "reproof_ok": true,
+  "directed": {
+    "assembled": 35,
+    "passed": 35,
+    "ran": 35,
+    "skipped": "",
+    "logs": [
+      "pass vadd_vi.elf rv64gcv",
+      "pass vadd_vv.elf rv64gcv",
+      "pass vadd_vx.elf rv64gcv",
+      "pass vand_vi.elf rv64gcv",
+      "pass vand_vv.elf rv64gcv",
+      "pass vand_vx.elf rv64gcv",
+      "pass vle32_v.elf rv64gcv",
+      "pass vmul_vv.elf rv64gcv",
+      "pass vmul_vx.elf rv64gcv",
+      "pass vmv_s_x.elf rv64gcv",
+      "pass vmv_v_i.elf rv64gcv",
+      "pass vmv_v_v.elf rv64gcv",
+      "pass vmv_v_x.elf rv64gcv",
+      "pass vmv_x_s.elf rv64gcv",
+      "pass vor_vi.elf rv64gcv",
+      "pass vor_vv.elf rv64gcv",
+      "pass vor_vx.elf rv64gcv",
+      "pass vse32_v.elf rv64gcv",
+      "pass vsetivli.elf rv64gcv",
+      "pass vsetvl.elf rv64gcv",
+      "pass vsetvli.elf rv64gcv",
+      "pass vsll_vi.elf rv64gcv",
+      "pass vsll_vv.elf rv64gcv",
+      "pass vsll_vx.elf rv64gcv",
+      "pass vsra_vi.elf rv64gcv",
+      "pass vsra_vv.elf rv64gcv",
+      "pass vsra_vx.elf rv64gcv",
+      "pass vsrl_vi.elf rv64gcv",
+      "pass vsrl_vv.elf rv64gcv",
+      "pass vsrl_vx.elf rv64gcv",
+      "pass vsub_vv.elf rv64gcv",
+      "pass vsub_vx.elf rv64gcv",
+      "pass vxor_vi.elf rv64gcv",
+      "pass vxor_vv.elf rv64gcv",
+      "pass vxor_vx.elf rv64gcv"
+    ]
+  },
+  "stress": {
+    "assembled": 1,
+    "passed": 1,
+    "ran": 1,
+    "skipped": ""
+  },
+  "agent_ready": false,
+  "isolation_log": "hackathon/artifacts/isolation_log.json"
+}

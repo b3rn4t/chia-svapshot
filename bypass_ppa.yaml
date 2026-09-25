@@ -1,0 +1,18 @@
+# Offline replay for the CHIA PPA loop.
+#
+# A bypassed node is still dispatched through Ray with its real resource
+# requirements. Delete an entry to run that stage for real.
+
+bypass:
+    vcf_elaborate:
+        bypass: true
+    yosys_ppa:
+        bypass: true
+    svapshot_generate_and_freeze:
+        bypass: true
+    llm_rtl_rewrite:
+        bypass: true
+    svapshot_reprove:
+        bypass: true
+    yosys_lec:
+        bypass: true

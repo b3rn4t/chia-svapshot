@@ -1,0 +1,327 @@
+# One snapshot DUT per design. Paths are resolved in this order:
+#   1. $SVAPSHOT_ROOT-relative
+#   2. $CHIPYARD_ROOT-relative (MegaBOOM firtool + fpnew copy)
+#   3. absolute
+#
+# max_regression: the other PPA axis may grow by at most this fraction.
+
+designs:
+  fpnew:
+    source: cvfpu / pulp common_cells (chipyard copy)
+    snapshot_module: lzc
+    module_type: combinational
+    rtl:
+      - ${CHIPYARD_ROOT}/generators/radiance/src/main/resources/vsrc/vortex/third_party/fpnew/src/common_cells/src/lzc.sv
+    packages:
+      - ${CHIPYARD_ROOT}/generators/radiance/src/main/resources/vsrc/vortex/third_party/fpnew/src/common_cells/src/cf_math_pkg.sv
+    parameters:
+      WIDTH: 32
+      MODE: 1
+    rewrite: |
+      Drop 2**N pad nodes (WIDTH-exact tree) or replace with a one-hot→bin
+      encoder. Do not change in_i / cnt_o / empty_o.
+    rewrites:
+      optimise: |
+        Keep interface, keep functionality and optimise RTL for better PPA.
+        Same CLZ/CTZ results. Recode the reduction (WIDTH-exact tree or
+        one-hot→bin). Ports stay in_i / cnt_o / empty_o.
+      expand: |
+        Keep current results. Also report whether the input was a power of
+        two on empty_o polarity or an existing output encoding. No new ports.
+      trim: |
+        Keep the port list. Implement only the leading-zero count for a
+        non-zero input; tie empty_o to a constant if needed.
+    goal: area_or_delay
+    max_regression: 0.05
+
+  sargantana:
+    source: benchmarks/sargantana (submodule)
+    snapshot_module: div_unit
+    module_type: sequential
+    rtl:
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/datapath/rtl/exe_stage/rtl/div_unit.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/datapath/rtl/exe_stage/rtl/div_4bits.sv
+    packages:
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/datapath/rtl/exe_stage/rtl/fpu/src/fpnew_pkg.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/includes/riscv_pkg.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/includes/drac_pkg.sv
+    rewrite: |
+      Early-out when the divisor is 0 or 1 (skip the 17/33 radix-4
+      iterations; results already muxed). Do not change the div_unit
+      port list. div_4bits stays a leaf.
+    rewrites:
+      optimise: |
+        Keep interface, keep functionality and optimise RTL for better PPA.
+        Same quotients and remainders for every current op. Early-out on
+        divisor 0/1 or remainder 0 is allowed. Ports frozen. div_4bits
+        stays a leaf.
+      expand: |
+        Keep every current DIV/REM result. Also early-out when the unsigned
+        dividend is already smaller than the divisor (quo=0, rem=dividend).
+        Ports frozen. div_4bits stays a leaf.
+      trim: |
+        Same port list. Keep only unsigned 64-bit DIV. Drop REM, signed, and
+        32-bit paths; tie unused result fields to 0. div_4bits may stay.
+    goal: area_or_delay
+    max_regression: 0.05
+
+  mul_unit:
+    source: benchmarks/sargantana (submodule)
+    snapshot_module: mul_unit
+    module_type: sequential
+    match_instance:
+      parent: ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/datapath/rtl/exe_stage/rtl/exe_stage.sv
+      instance: mul_unit_inst
+      packages:
+        - ${SVAPSHOT_ROOT}/benchmarks/sargantana/includes/drac_pkg.sv
+        - ${SVAPSHOT_ROOT}/benchmarks/sargantana/includes/riscv_pkg.sv
+        - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/datapath/rtl/exe_stage/rtl/fpu/src/fpnew_pkg.sv
+    rtl:
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/datapath/rtl/exe_stage/rtl/mul_unit.sv
+    packages:
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/datapath/rtl/exe_stage/rtl/fpu/src/fpnew_pkg.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/includes/riscv_pkg.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/includes/drac_pkg.sv
+    rewrite: |
+      Bypass the 64x32 arrays when an operand is 0 or 1 (result is 0 or
+      the other operand). Do not change the mul_unit port list.
+    rewrites:
+      optimise: |
+        Keep interface, keep functionality and optimise RTL for better PPA.
+        Same MUL/MULH/MULW products for every current op.
+        Prefer a 0/1 operand bypass and a shared 32/64 array; do not add
+        pipeline stages or extra product registers. Ports frozen.
+      expand: |
+        Keep every current product. Also bypass when an operand is a power
+        of two (shift instead of the array). Ports frozen.
+      trim: |
+        Same port list. Keep only unsigned 64-bit MUL. Drop MULH, MULW, and
+        signed paths; unused result fields may be 0.
+    goal: area_or_delay
+    max_regression: 0.05
+
+  ptw:
+    source: benchmarks/sargantana MMU (submodule)
+    snapshot_module: ptw
+    module_type: sequential
+    match_instance:
+      parent: ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/rtl/mmu_top.sv
+      instance: ptw_inst
+      packages:
+        - ${SVAPSHOT_ROOT}/benchmarks/sargantana/includes/riscv_pkg.sv
+        - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/includes/mmu_pkg.sv
+    rtl:
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/rtl/ptw/ptw.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/rtl/ptw/ptw_arb.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/rtl/common/pseudoLRU.sv
+    packages:
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/includes/riscv_pkg.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/includes/mmu_pkg.sv
+    rewrite: |
+      Skip a memory walk when the PTE cache already holds the next-level
+      PPN (stay on the existing pte_cache_hit path). Do not change ptw
+      ports. ptw_arb and pseudoLRU stay leaves.
+    rewrites:
+      optimise: |
+        Keep interface, keep functionality and optimise RTL for better PPA.
+        Same Sv39 / virtualized walks and the same PTE-cache hits.
+        Do not add a last-leaf replay buffer (that grew area last time).
+        Prefer one shared VS/G walk datapath, one PTE decoder, and a
+        recoded FSM without extra flops. Ports frozen. ptw_arb and
+        pseudoLRU stay leaves.
+      expand: |
+        Keep every current walk. Also remember the last leaf PTE and replay
+        it when the next request is the same VPN. Ports frozen.
+      trim: |
+        Same port list. Bare Sv39, three-level walk only. Drop G-stage /
+        virtualization and the PTE cache; unused outputs may be 0.
+        ptw_arb and pseudoLRU stay leaves.
+    goal: area_or_delay
+    max_regression: 0.05
+
+  tlb:
+    source: benchmarks/sargantana MMU (submodule)
+    snapshot_module: tlb
+    module_type: sequential
+    match_instance:
+      parent: ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/rtl/mmu_top.sv
+      instance: itlb
+      packages:
+        - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/includes/mmu_pkg.sv
+    rtl:
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/rtl/tlb/tlb.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/rtl/common/pseudoLRU.sv
+    packages:
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/includes/mmu_pkg.sv
+    rewrite: |
+      Share the ASID/VMID equality across the G/M/K CAM compares instead
+      of repeating it per page size. Do not change the tlb port list.
+      pseudoLRU stays a leaf.
+    rewrites:
+      optimise: |
+        Keep interface, keep functionality and optimise RTL for better PPA.
+        Same hits and replacements for G/M/K sizes.
+        Share the ASID/VMID/VPN compare across page-size CAMs; do not add
+        a last-hit bypass (that is expand). Ports frozen. pseudoLRU stays
+        a leaf.
+      expand: |
+        Keep every current lookup. Add a 1-entry last-hit bypass on the
+        existing request/response ports. Ports frozen.
+      trim: |
+        Same port list. 4K pages only. Drop G/M sizes and virtualization
+        compares; unused hit/exception outputs may be 0. pseudoLRU stays
+        a leaf.
+    goal: area_or_delay
+    max_regression: 0.05
+
+  mmu_top:
+    source: benchmarks/sargantana MMU (submodule)
+    snapshot_module: mmu_top
+    module_type: sequential
+    # Not instantiated in top_drac. Same child RTL and mmu_pkg parameters
+    # as the finished core (TLB_ENTRIES=8, Sv39). No module parameters.
+    rtl:
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/rtl/mmu_top.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/rtl/tlb/tlb.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/rtl/ptw/ptw.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/rtl/ptw/ptw_arb.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/rtl/common/pseudoLRU.sv
+    packages:
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/includes/mmu_pkg.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/includes/riscv_pkg.sv
+    rewrite_scope: top
+    rewrites:
+      optimise: |
+        Keep interface, keep functionality and optimise RTL for better PPA.
+        This module wires one iTLB, one dTLB, and one PTW. tlb, ptw,
+        ptw_arb, and pseudoLRU stay leaves. Do not change ports or the
+        TLB–PTW protocol. Only rewrite this wrapper. Ports frozen.
+      expand: |
+        Keep every current translation. Add one capability on the existing
+        ports. Children stay leaves. Ports frozen.
+      trim: |
+        Same port list. Keep iTLB plus PTW. The dTLB response may be a
+        miss. Children stay leaves.
+    goal: area_or_delay
+    max_regression: 0.05
+
+  bsc_mmu:
+    source: benchmarks/sargantana MMU (submodule)
+    snapshot_module: bsc_mmu
+    module_type: sequential
+    match_instance:
+      parent: ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/top_drac.sv
+      instance: bsc_mmu_inst
+      packages:
+        - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/includes/mmu_pkg.sv
+        - ${SVAPSHOT_ROOT}/benchmarks/sargantana/includes/riscv_pkg.sv
+    rtl:
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/rtl/bsc_mmu.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/rtl/tlb/tlb.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/rtl/ptw/ptw.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/rtl/ptw/ptw_arb.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/rtl/common/pseudoLRU.sv
+    packages:
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/mmu/includes/mmu_pkg.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/includes/riscv_pkg.sv
+    rewrite_scope: top
+    rewrites:
+      optimise: |
+        Keep interface, keep functionality and optimise RTL for better PPA.
+        This is the MMU instance in top_drac (bsc_mmu_inst): one iTLB, one
+        dTLB, one PTW. tlb, ptw, ptw_arb, and pseudoLRU stay leaves. Do not
+        change ports or the TLB–PTW protocol. Only rewrite this wrapper.
+        Ports frozen.
+      expand: |
+        Keep every current translation. Add one capability on the existing
+        ports. Children stay leaves. Ports frozen.
+      trim: |
+        Same port list. Keep iTLB plus PTW. The dTLB response may be a
+        miss. Children stay leaves.
+    goal: area_or_delay
+    max_regression: 0.05
+
+  fpnew_top:
+    source: cvfpu (Sargantana exe-stage copy)
+    snapshot_module: fpnew_top
+    module_type: sequential
+    rewrite_scope: top
+    # Elaborate as the scalar issue-path FPU (fpu_drac_wrapper i_fpuv_top):
+    # EPI_RV64D + EPI_INIT (Width=64, no vectors, 5-deep DISTRIBUTED pipes).
+    # Struct parameters are folded into DUT header defaults; Yosys -G only
+    # sees numeric leftovers.
+    match_instance:
+      parent: ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/datapath/rtl/exe_stage/rtl/old_fpu/fpu_drac_wrapper.sv
+      instance: i_fpuv_top
+      packages:
+        - ${SVAPSHOT_ROOT}/benchmarks/sargantana/includes/drac_pkg.sv
+        - ${SVAPSHOT_ROOT}/benchmarks/sargantana/includes/riscv_pkg.sv
+        - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/datapath/rtl/exe_stage/rtl/fpu/src/fpnew_pkg.sv
+    rtl:
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/datapath/rtl/exe_stage/rtl/fpu/src/fpnew_top.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/datapath/rtl/exe_stage/rtl/fpu/vendor/opene906/E906_RTL_FACTORY/gen_rtl/clk/rtl/gated_clk_cell.v
+    rtl_globs:
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/datapath/rtl/exe_stage/rtl/fpu/src/fpnew_*.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/datapath/rtl/exe_stage/rtl/fpu/src/common_cells/src/rr_arb_tree.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/datapath/rtl/exe_stage/rtl/fpu/src/common_cells/src/lzc.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/datapath/rtl/exe_stage/rtl/fpu/src/fpu_div_sqrt_mvp/hdl/*.sv
+      # C910 T-Head DivSqrt (THMULTI default). Same list as cvFPU src_files.yml.
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/datapath/rtl/exe_stage/rtl/fpu/vendor/openc910/C910_RTL_FACTORY/gen_rtl/vfdsu/rtl/*.v
+    packages:
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/datapath/rtl/exe_stage/rtl/fpu/src/fpnew_pkg.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/datapath/rtl/exe_stage/rtl/fpu/src/common_cells/src/cf_math_pkg.sv
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/datapath/rtl/exe_stage/rtl/fpu/src/fpu_div_sqrt_mvp/hdl/defs_div_sqrt_mvp.sv
+    include_dirs:
+      - ${SVAPSHOT_ROOT}/benchmarks/sargantana/rtl/datapath/rtl/exe_stage/rtl/fpu/src/common_cells/include
+    rewrite: |
+      Keep interface, keep functionality and optimise RTL for better PPA.
+      Top-level only: rewrite fpnew_top.sv. Child modules stay leaves.
+    rewrites:
+      optimise: |
+        Keep interface, keep functionality and optimise RTL for better PPA.
+        Top-level only. Same FPU results for the same operands / op / formats.
+        Do NOT change valid/ready/busy/flush/early_valid timing. Three Flash
+        attempts each failed the same 14 properties and left Yosys cells at
+        74070: a_busy_stays_high_on_new_req, a_early_valid_implies_out_valid_next,
+        a_early_valid_keeps_busy_high, a_empty_implies_no_early_valid,
+        a_empty_no_req_implies_no_early_valid_next, a_flush_clears_both_valids,
+        a_flush_forces_ready_if_empty, a_flush_implies_ready_next_cycle,
+        a_in_ready_low_implies_busy, a_in_valid_implies_busy_next,
+        a_in_valid_stable, a_out_valid_and_ready_keeps_busy_if_early_valid,
+        a_out_valid_and_ready_keeps_out_valid_if_early_valid,
+        a_stalled_req_keeps_busy_high.
+        Only share combinational opgroup muxing and NaN-box checks. A rewrite
+        that does not reduce cells is rejected.
+        Do not emit child modules. Ports frozen.
+      expand: |
+        Keep every current FPU result. Add one extra capability on the
+        existing port list. Top-level only. Ports frozen.
+      trim: |
+        Same port list. Keep a single opgroup path at the top; unused
+        outputs may be 0. Top-level only. Children stay leaves.
+    goal: area_or_delay
+    max_regression: 0.05
+
+  megaboom:
+    source: MegaBoomV3Config firtool collateral
+    snapshot_module: AMOALU
+    module_type: combinational
+    rtl:
+      - ${CHIPYARD_ROOT}/sims/verilator/generated-src/chipyard.harness.TestHarness.MegaBoomV3Config/gen-collateral/AMOALU.sv
+    packages: []
+    rewrite: |
+      Parallel add / logic / minmax; adder only on AMOADD (cmd==5'h8).
+      Do not change io_mask / io_cmd / io_lhs / io_rhs / io_out.
+    rewrites:
+      optimise: |
+        Keep interface, keep functionality and optimise RTL for better PPA.
+        Same AMO results. Parallel add / logic / minmax is allowed. Ports
+        frozen.
+      expand: |
+        Keep every current AMO. Also handle AMOMAX/AMOMIN through the same
+        parallel minmax path if they currently share the adder. No new ports.
+      trim: |
+        Same port list. Keep AMOADD and bitwise AMOs. Drop min/max; those
+        cmds may drive io_out to 0.
+    goal: delay
+    max_regression: 0.05

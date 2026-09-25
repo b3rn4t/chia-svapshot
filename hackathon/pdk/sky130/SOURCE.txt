@@ -1,0 +1,5 @@
+sky130_fd_sc_hd__tt_025C_1v80.lib
+Sky130 high-density typical corner (25 C, 1.8 V).
+Same library Chipyard Hammer selects for tech_name=sky130
+(hammer.technology.sky130 + hammer.synthesis.yosys).
+Fetched from OpenROAD-flow-scripts flow/platforms/sky130hd/lib.

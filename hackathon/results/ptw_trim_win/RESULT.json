@@ -1,0 +1,19 @@
+{
+  "directory": "ptw_trim_win",
+  "module": "ptw",
+  "execution_type": "trim",
+  "verdict": "win",
+  "outcome": "snapshot_fail",
+  "headline": "failing snapshot on new design",
+  "model": "gemini-3.1-pro-preview",
+  "baseline_ppa": {
+    "cells": 2813,
+    "levels": 22
+  },
+  "candidate_ppa": {
+    "cells": 582,
+    "levels": 13
+  },
+  "snapshot": "0/37 retained properties proved",
+  "workspace": "chia_svapshot/runs/ppa_ptw_opt"
+}

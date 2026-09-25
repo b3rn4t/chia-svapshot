@@ -1,0 +1,19 @@
+{
+  "directory": "ptw_expand_loss",
+  "module": "ptw",
+  "execution_type": "expand",
+  "verdict": "loss",
+  "outcome": "snapshot_fail",
+  "headline": "failing snapshot on new design",
+  "model": "gemini-3.1-pro-preview",
+  "baseline_ppa": {
+    "cells": 2813,
+    "levels": 22
+  },
+  "candidate_ppa": {
+    "cells": 3148,
+    "levels": 22
+  },
+  "snapshot": "0/43 retained properties proved",
+  "workspace": "chia_svapshot/runs/ppa_ptw_opt"
+}

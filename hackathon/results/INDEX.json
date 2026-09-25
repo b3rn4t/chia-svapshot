@@ -1,0 +1,50 @@
+[
+  {
+    "directory": "div_unit_optimise_win",
+    "module": "div_unit",
+    "execution_type": "optimise",
+    "verdict": "win",
+    "outcome": "ppa_win_snapshot_pass",
+    "headline": "better PPA and passing snapshot"
+  },
+  {
+    "directory": "div_unit_expand_loss",
+    "module": "div_unit",
+    "execution_type": "expand",
+    "verdict": "loss",
+    "outcome": "snapshot_pass_no_ppa",
+    "headline": ""
+  },
+  {
+    "directory": "div_unit_trim_win",
+    "module": "div_unit",
+    "execution_type": "trim",
+    "verdict": "win",
+    "outcome": "ppa_win_snapshot_pass",
+    "headline": "better PPA and passing snapshot"
+  },
+  {
+    "directory": "ptw_optimise_loss",
+    "module": "ptw",
+    "execution_type": "optimise",
+    "verdict": "loss",
+    "outcome": "snapshot_pass_no_ppa",
+    "headline": ""
+  },
+  {
+    "directory": "ptw_expand_loss",
+    "module": "ptw",
+    "execution_type": "expand",
+    "verdict": "loss",
+    "outcome": "snapshot_fail",
+    "headline": "failing snapshot on new design"
+  },
+  {
+    "directory": "ptw_trim_win",
+    "module": "ptw",
+    "execution_type": "trim",
+    "verdict": "win",
+    "outcome": "snapshot_fail",
+    "headline": "failing snapshot on new design"
+  }
+]

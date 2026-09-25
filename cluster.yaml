@@ -1,0 +1,62 @@
+# Logical workers for the SVApshot loop.
+#
+# Bring it up with:  chia up cluster.yaml
+# Submit the loop:   chia job submit --working-dir . -- python svapshot_loop.py --ray-address auto
+#
+# Requires SVAPSHOT_ROOT in the environment (container default: /aisva).
+# Example:  export SVAPSHOT_ROOT=/aisva
+#
+# The three worker classes mirror the resource labels the nodes ask for in
+# chia_svapshot/svapshot_nodes.py. The important one is `formal`: its worker
+# count is the number of concurrent VC Formal licences you own, so Ray — not a
+# lock file — becomes the thing that stops the loop from over-subscribing them.
+#
+# There is no `docker:` block here on purpose. SVApshot needs the Synopsys
+# installation and the checkout that are already on these machines, so workers
+# run directly on the host. Add a docker section per worker if you containerise
+# the toolchain.
+
+provider:
+    head_ip: ${THIS_MACHINE}
+
+auth:
+    ssh_user: ${USER}
+    # ssh_private_key: ~/.ssh/id_rsa
+
+available_node_types:
+    # harness scaffolding, DUT staging, artifact parsing. Cheap and parallel.
+    svapshot_cpu:
+        resources: {"svapshot_cpu": 4}
+        num_workers: 1
+        compatible_ips: ["${THIS_MACHINE}"]
+        worker_setup_commands:
+            - "export SVAPSHOT_ROOT=${SVAPSHOT_ROOT}"
+
+    # Seeding via the LLM and any other credit-spending call. Bounded so a wide
+    # loop cannot burn the rate limit.
+    svapshot_llm:
+        resources: {"llm": 2}
+        num_workers: 1
+        compatible_ips: ["${THIS_MACHINE}"]
+
+    # The scarce one: each unit is one formal-tool licence.
+    svapshot_formal:
+        resources: {"formal": 1}
+        num_workers: 1
+        compatible_ips: ["${THIS_MACHINE}"]
+        worker_setup_commands:
+            - "test -n \"${VC_FORMAL_HOME}\" || { echo set VC_FORMAL_HOME; exit 1; }"
+            - "export PATH=$VC_FORMAL_HOME/bin:$PATH"
+
+head_env_commands: ["source ${SVAPSHOT_ROOT}/chia_env/bin/activate"]
+head_setup_commands: ["source ${SVAPSHOT_ROOT}/chia_env/bin/activate"]
+head_start_ray_commands:
+    - "source ${SVAPSHOT_ROOT}/chia_env/bin/activate && ray stop"
+    - "source ${SVAPSHOT_ROOT}/chia_env/bin/activate && \
+       ray start --head --port=6379 --include-dashboard=True \
+       --dashboard-agent-listen-port=0"
+
+worker_start_ray_commands:
+    - "source ${SVAPSHOT_ROOT}/chia_env/bin/activate && ray stop"
+    - "source ${SVAPSHOT_ROOT}/chia_env/bin/activate && \
+       ray start --address=$RAY_HEAD_IP:6379 --dashboard-agent-listen-port=0"
